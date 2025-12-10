@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Camera, Download, X, SwitchCamera, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import cameraImage from './assets/camera.png';
+import backgroundMusic from './assets/christmas-holiday-438466.mp3';
 import { playCameraShutterSound, playSlideSound, playCountdownBeep } from './utils/soundEffects';
 import { Snowfall } from './components/Snowfall';
 import { projectId, publicAnonKey } from './utils/supabase/info';
@@ -136,6 +137,35 @@ export default function App() {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const captureAudioRef = useRef<HTMLAudioElement | null>(null);
   const slideAudioRef = useRef<HTMLAudioElement | null>(null);
+  const bgMusicRef = useRef<HTMLAudioElement | null>(null);
+
+  // Play background music on mount
+  useEffect(() => {
+    const audio = new Audio(backgroundMusic);
+    audio.volume = 0.03; // 3% volume
+    audio.loop = true; // Loop the music
+    bgMusicRef.current = audio;
+
+    // Auto-play with error handling
+    audio.play().catch(err => {
+      console.log('Background music autoplay blocked:', err);
+      // Attempt to play on first user interaction
+      const playOnInteraction = () => {
+        audio.play().catch(e => console.error('Error playing background music:', e));
+        document.removeEventListener('click', playOnInteraction);
+        document.removeEventListener('touchstart', playOnInteraction);
+      };
+      document.addEventListener('click', playOnInteraction);
+      document.addEventListener('touchstart', playOnInteraction);
+    });
+
+    return () => {
+      if (bgMusicRef.current) {
+        bgMusicRef.current.pause();
+        bgMusicRef.current = null;
+      }
+    };
+  }, []);
 
   // Fetch global capture count on mount
   useEffect(() => {
