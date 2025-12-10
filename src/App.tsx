@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Download, X, SwitchCamera, Instagram } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import cameraImage from 'figma:asset/7adbcf8d85ff97fcacb261d86d53ec817ff9ba06.png';
+import cameraImage from './assets/camera.png';
 import { playCameraShutterSound, playSlideSound, playCountdownBeep } from './utils/soundEffects';
 import { Snowfall } from './components/Snowfall';
 import { projectId, publicAnonKey } from './utils/supabase/info';
@@ -128,7 +128,7 @@ export default function App() {
   const [captureCount, setCaptureCount] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
   const [countdown, setCountdown] = useState<number | null>(null);
-  
+
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const polaroidRef = useRef<HTMLDivElement>(null);
@@ -164,12 +164,12 @@ export default function App() {
   // Detect if device is mobile
   useEffect(() => {
     const checkMobile = () => {
-      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
-                            ('ontouchstart' in window) || 
-                            (navigator.maxTouchPoints > 0);
+      const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+        ('ontouchstart' in window) ||
+        (navigator.maxTouchPoints > 0);
       setIsMobile(isMobileDevice);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -179,9 +179,9 @@ export default function App() {
   const handleNameFocus = () => {
     // Small delay to ensure keyboard is shown
     setTimeout(() => {
-      nameInputRef.current?.scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'top' 
+      nameInputRef.current?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'top'
       });
     }, 300);
   };
@@ -194,33 +194,33 @@ export default function App() {
   // Start camera
   const startCamera = async (mode: FacingMode = facingMode) => {
     setPermissionDenied(false);
-    
+
     // Stop existing stream if any
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
     }
-    
+
     try {
       const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
+        video: {
           facingMode: mode,
           width: { ideal: 1920 },
           height: { ideal: 1080 }
         },
         audio: false
       });
-      
+
       setStream(mediaStream);
       setState('camera');
       setFacingMode(mode);
-      
+
       // Wait a bit for state to update and component to render
       await new Promise(resolve => setTimeout(resolve, 100));
-      
+
       // Ensure video element is ready
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        
+
         try {
           await videoRef.current.play();
         } catch (playError) {
@@ -238,7 +238,7 @@ export default function App() {
     } catch (error) {
       console.error('Error accessing camera:', error);
       setPermissionDenied(true);
-      
+
       if (error instanceof Error) {
         if (error.name === 'NotAllowedError') {
           alert('Camera permission denied. Please allow camera access in your browser settings and try again.');
@@ -256,16 +256,16 @@ export default function App() {
   // Switch camera (front/back)
   const switchCamera = async () => {
     const newMode = facingMode === 'user' ? 'environment' : 'user';
-    
+
     // Stop current stream first
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
-    
+
     // Wait a bit to ensure old stream is fully stopped
     await new Promise(resolve => setTimeout(resolve, 200));
-    
+
     // Start new camera
     await startCamera(newMode);
   };
@@ -302,19 +302,19 @@ export default function App() {
     // Get image data
     const imageData = canvas.toDataURL('image/png');
     setCapturedImage(imageData);
-    
+
     // Set random Polaroid text
     setUserName(getRandomPolaroidText());
 
     // Play camera shutter sound and show flash simultaneously
     playCameraShutterSound();
     setShowFlash(true);
-    
+
     // Hide flash after animation
     setTimeout(() => {
       setShowFlash(false);
     }, 400);
-    
+
     // Play slide sound after delay (when card starts sliding)
     setTimeout(() => {
       playSlideSound();
@@ -357,21 +357,21 @@ export default function App() {
     // Start countdown from 3
     setCountdown(3);
     playCountdownBeep();
-    
+
     // Wait 1 second
     await new Promise(resolve => setTimeout(resolve, 1000));
     setCountdown(2);
     playCountdownBeep();
-    
+
     // Wait 1 second
     await new Promise(resolve => setTimeout(resolve, 1000));
     setCountdown(1);
     playCountdownBeep();
-    
+
     // Wait 1 second
     await new Promise(resolve => setTimeout(resolve, 1000));
     setCountdown(null);
-    
+
     // Capture the photo
     await capturePhoto();
   };
@@ -555,9 +555,9 @@ export default function App() {
         // Convert to blob and share
         canvas.toBlob(async (blob) => {
           if (!blob) return;
-          
+
           const file = new File([blob], `polaroid-${Date.now()}.png`, { type: 'image/png' });
-          
+
           // Try Web Share API first (works great on mobile with Instagram app)
           if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
             try {
@@ -575,7 +575,7 @@ export default function App() {
               console.log('Share failed:', error);
             }
           }
-          
+
           // Fallback for browsers without Web Share API or on desktop
           // Download the image
           const url = URL.createObjectURL(blob);
@@ -613,7 +613,7 @@ export default function App() {
   useEffect(() => {
     if (stream && videoRef.current && state === 'camera') {
       videoRef.current.srcObject = stream;
-      
+
       const playVideo = async () => {
         try {
           await videoRef.current?.play();
@@ -621,7 +621,7 @@ export default function App() {
           console.error('Error auto-playing video:', error);
         }
       };
-      
+
       playVideo();
     }
   }, [stream, state]);
@@ -630,7 +630,7 @@ export default function App() {
     <div className={`min-h-screen ${state === 'idle' ? 'overflow-hidden' : 'overflow-auto'} bg-gradient-to-br from-red-50 via-green-50 to-red-100 relative flex flex-col`} style={{ paddingTop: '10vh' }}>
       {/* Snowfall Effect */}
       <Snowfall />
-      
+
       {/* Flash overlay */}
       <AnimatePresence>
         {showFlash && (
@@ -676,13 +676,25 @@ export default function App() {
                 transition={{ duration: 0.5 }}
                 className="flex flex-col items-center"
               >
-                <div className="relative cursor-pointer" onClick={startCamera}>
+                <div className="relative cursor-pointer" onClick={() => startCamera()}>
                   <img
                     src={cameraImage}
                     alt="Polaroid Camera"
                     className="w-72 md:w-88 drop-shadow-2xl hover:scale-103 transition-transform"
                   />
                 </div>
+
+                {/* Instruction text */}
+                <p
+                  className="mt-3 text-gray-500"
+                  style={{
+                    fontFamily: 'Bricolage Grotesque, sans-serif',
+                    fontWeight: 300,
+                    fontSize: '12px'
+                  }}
+                >
+                  tap on camera to capture
+                </p>
 
                 {permissionDenied && (
                   <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg max-w-md">
@@ -691,6 +703,8 @@ export default function App() {
                     </p>
                   </div>
                 )}
+
+
               </motion.div>
             )}
 
@@ -710,7 +724,7 @@ export default function App() {
                       className="w-full h-full object-cover"
                       style={{ transform: 'scaleX(-1)' }}
                     />
-                    
+
                     {/* Countdown Overlay */}
                     <AnimatePresence>
                       {countdown !== null && (
@@ -721,10 +735,10 @@ export default function App() {
                           transition={{ duration: 0.3 }}
                           className="absolute inset-0 flex items-center justify-center bg-black/50 z-20"
                         >
-                          <div 
+                          <div
                             className="text-white"
-                            style={{ 
-                              fontFamily: 'Bricolage Grotesque, sans-serif', 
+                            style={{
+                              fontFamily: 'Bricolage Grotesque, sans-serif',
                               fontWeight: 700,
                               fontSize: '120px',
                               textShadow: '0 4px 20px rgba(0,0,0,0.5)'
@@ -735,7 +749,7 @@ export default function App() {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
+
                     <button
                       onClick={stopCamera}
                       className="absolute top-4 right-4 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors z-10"
@@ -810,7 +824,7 @@ export default function App() {
                           style={{ aspectRatio: '4/5', padding: '20px' }}
                         >
                           {/* Paper Texture Background */}
-                          <div 
+                          <div
                             className="absolute inset-0 pointer-events-none"
                             style={{
                               backgroundImage: 'url(https://images.unsplash.com/photo-1719563015025-83946fb49e49?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbGQlMjBwYXBlciUyMHRleHR1cmV8ZW58MXx8fHwxNzY1MjYzNjQyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral)',
@@ -820,11 +834,11 @@ export default function App() {
                               borderRadius: '6px'
                             }}
                           />
-                          
+
                           {/* Photo */}
-                          <div 
-                            className="relative w-full bg-gray-100 overflow-hidden z-10" 
-                            style={{ 
+                          <div
+                            className="relative w-full bg-gray-100 overflow-hidden z-10"
+                            style={{
                               height: 'calc(100% - 36px)', // 24px font + 12px spacing
                               marginBottom: '12px',
                               borderRadius: '6px'
@@ -836,22 +850,25 @@ export default function App() {
                               className="w-full h-full object-cover"
                             />
                           </div>
-                          
+
                           {/* Name Input at Bottom */}
                           <input
                             ref={nameInputRef as any}
                             type="text"
                             value={userName}
                             onChange={handleNameChange}
-                            className="w-full text-center bg-transparent outline-none relative z-10"
-                            style={{ 
-                              fontFamily: 'Caveat, cursive', 
+                            className="w-full text-center bg-transparent outline-none relative"
+                            style={{
+                              fontFamily: 'Caveat, cursive',
                               fontSize: '24px',
                               color: '#1f2937',
                               border: 'none',
                               lineHeight: '1.5',
                               padding: '0',
-                              margin: '0'
+                              margin: '0',
+                              zIndex: 20,
+                              WebkitAppearance: 'none',
+                              appearance: 'none'
                             }}
                             onFocus={handleNameFocus}
                           />
@@ -889,7 +906,7 @@ export default function App() {
                           New Photo
                         </button>
                       </motion.div>
-                      
+
                       {/* Instagram Share Button */}
                       <motion.div
                         initial={{ opacity: 0, y: 10 }}
@@ -933,12 +950,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer absolute"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -948,10 +965,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -966,12 +983,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer absolute"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -981,10 +998,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -999,12 +1016,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer absolute"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1014,10 +1031,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1032,12 +1049,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer absolute"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1047,10 +1064,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1065,12 +1082,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer absolute"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1080,10 +1097,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1101,12 +1118,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1116,10 +1133,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1134,12 +1151,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1149,10 +1166,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1167,12 +1184,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1182,10 +1199,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1200,12 +1217,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1215,10 +1232,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1233,12 +1250,12 @@ export default function App() {
                 whileHover={{ scale: 1.1 }}
                 transition={{ duration: 0.3 }}
                 className="bg-white p-3 rounded-lg shadow-xl cursor-pointer"
-                style={{ 
+                style={{
                   width: '200px',
                   aspectRatio: '4/5'
                 }}
               >
-                <div 
+                <div
                   className="w-full bg-gray-100 overflow-hidden rounded-md"
                   style={{ height: 'calc(100% - 36px)' }}
                 >
@@ -1248,10 +1265,10 @@ export default function App() {
                     className="w-full h-full object-cover"
                   />
                 </div>
-                <p 
+                <p
                   className="text-center mt-2"
-                  style={{ 
-                    fontFamily: 'Caveat, cursive', 
+                  style={{
+                    fontFamily: 'Caveat, cursive',
                     fontSize: '18px',
                     color: '#1f2937'
                   }}
@@ -1269,9 +1286,9 @@ export default function App() {
             </p>
             <p className="text-gray-600" style={{ fontFamily: 'Bricolage Grotesque, sans-serif' }}>
               Designed with <span className="text-purple-600">💜</span> | By{' '}
-              <a 
-                href="https://siddart.net" 
-                target="_blank" 
+              <a
+                href="https://siddart.net"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-gray-800 transition-colors underline"
               >
@@ -1284,7 +1301,7 @@ export default function App() {
 
       {/* Hidden canvas for capture */}
       <canvas ref={canvasRef} className="hidden" />
-      
+
     </div>
   );
 }
