@@ -323,10 +323,14 @@ export default function App() {
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
 
-    // Always mirror the image
+    // Only mirror front camera (user-facing), back camera should show real view
     context.save();
-    context.scale(-1, 1);
-    context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    if (facingMode === 'user') {
+      context.scale(-1, 1);
+      context.drawImage(video, -canvas.width, 0, canvas.width, canvas.height);
+    } else {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+    }
     context.restore();
 
     // Get image data
@@ -752,7 +756,7 @@ export default function App() {
                       autoPlay
                       playsInline
                       className="w-full h-full object-cover"
-                      style={{ transform: 'scaleX(-1)' }}
+                      style={{ transform: facingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)' }}
                     />
 
                     {/* Countdown Overlay */}
